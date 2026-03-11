@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Candidate Dashboard – JobSphere</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="css/index.css" />
+  <link rel="stylesheet" href="css/candidate-dashboard.css" />
+</head>
+<body>
+
+  <!-- Dashboard Header -->
+  <div class="dash-header">
+    <a href="index.html" class="dash-logo">
+      <div class="dash-logo-icon">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 6h-3V4c0-1.1-.9-2-2-2H9C7.9 2 7 2.9 7 4v2H4C2.9 6 2 6.9 2 8v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-9-2h6v2H9V4zm11 16H4v-2h16v2zm0-5H4V8h3v1c0 .55.45 1 1 1s1-.45 1-1V8h6v1c0 .55.45 1 1 1s1-.45 1-1V8h3v7z"/>
+        </svg>
+      </div>
+      <span class="dash-logo-name">Job<span>Sphere</span></span>
+    </a>
+
+    <div class="dash-nav">
+      <button class="nav-tab active" onclick="switchTab('browse')">Browse Jobs</button>
+      <button class="nav-tab" onclick="switchTab('applications')">My Applications</button>
+      <button class="nav-tab" onclick="switchTab('profile')">Profile</button>
+    </div>
+
+    <div class="dash-user">
+      <div class="dash-user-info">
+        <div class="dash-user-name" id="userName">Loading...</div>
+        <div class="dash-user-role">Candidate</div>
+      </div>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <!-- Main Dashboard -->
+  <div class="dash-container">
+
+    <!-- Browse Jobs Tab -->
+    <div class="tab-content active" id="browse-tab">
+
+      <!-- Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Available Jobs</div>
+          <div class="stat-value">247</div>
+        </div>
+        <div class="stat-card orange">
+          <div class="stat-label">Applications Sent</div>
+          <div class="stat-value" id="appliedCount">12</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-label">Profile Views</div>
+          <div class="stat-value">34</div>
+        </div>
+        <div class="stat-card blue">
+          <div class="stat-label">Saved Jobs</div>
+          <div class="stat-value">8</div>
+        </div>
+      </div>
+
+      <!-- Search & Filter -->
+      <div class="search-section">
+        <div class="search-row">
+          <div class="search-group">
+            <label>Job Title or Keywords</label>
+            <input type="text" id="searchKeyword" placeholder="e.g. Software Engineer, Designer..." />
+          </div>
+          <div class="search-group">
+            <label>Location</label>
+            <input type="text" id="searchLocation" placeholder="e.g. Remote, Mumbai, Bangalore" />
+          </div>
+          <div class="search-group">
+            <label>Job Type</label>
+            <select id="searchType">
+              <option value="">All Types</option>
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+              <option value="Contract">Contract</option>
+              <option value="Internship">Internship</option>
+            </select>
+          </div>
+          <button class="btn-search" onclick="searchJobs()">Search</button>
+        </div>
+      </div>
+
+      <!-- Jobs Grid -->
+      <div class="jobs-grid" id="jobsGrid">
+        <!-- Job cards will be loaded here -->
+      </div>
+
+    </div>
+
+    <!-- My Applications Tab -->
+    <div class="tab-content" id="applications-tab">
+      <h2 style="font-size: 1.6rem; color: #1f4959; margin-bottom: 24px;">My Applications</h2>
+      
+      <div class="applications-table">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Job Title</th>
+                <th>Company</th>
+                <th>Applied Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="applicationsTableBody">
+              <tr data-application-id="1">
+                <td class="job-title">Senior Full Stack Developer</td>
+                <td>Tech Solutions Inc.</td>
+                <td>Mar 5, 2026</td>
+                <td><span class="status-badge reviewed">Reviewed</span></td>
+                <td>
+                  <button class="btn-action" onclick="viewApplication(1)">View</button>
+                  <!-- Cannot cancel - already reviewed -->
+                </td>
+              </tr>
+              <tr data-application-id="2">
+                <td class="job-title">UI/UX Designer</td>
+                <td>Creative Agency</td>
+                <td>Mar 4, 2026</td>
+                <td><span class="status-badge shortlisted">Shortlisted</span></td>
+                <td>
+                  <button class="btn-action" onclick="viewApplication(2)">View</button>
+                  <!-- Cannot cancel - shortlisted -->
+                </td>
+              </tr>
+              <tr data-application-id="3">
+                <td class="job-title">Product Manager</td>
+                <td>StartUp Co.</td>
+                <td>Mar 3, 2026</td>
+                <td><span class="status-badge pending">Pending</span></td>
+                <td>
+                  <button class="btn-action" onclick="viewApplication(3)">View</button>
+                  <button class="btn-cancel" onclick="cancelApplication(3, 'Product Manager', 'StartUp Co.')">Cancel</button>
+                </td>
+              </tr>
+              <tr data-application-id="4">
+                <td class="job-title">Frontend Developer</td>
+                <td>Digital Solutions</td>
+                <td>Mar 1, 2026</td>
+                <td><span class="status-badge accepted">Interview Scheduled</span></td>
+                <td>
+                  <button class="btn-action" onclick="viewApplication(4)">View</button>
+                  <!-- Cannot cancel - interview scheduled -->
+                </td>
+              </tr>
+              <tr data-application-id="5">
+                <td class="job-title">Data Analyst</td>
+                <td>Analytics Corp</td>
+                <td>Feb 28, 2026</td>
+                <td><span class="status-badge rejected">Not Selected</span></td>
+                <td>
+                  <button class="btn-action" onclick="viewApplication(5)">View</button>
+                  <!-- Cannot cancel - already processed -->
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile Tab -->
+    <div class="tab-content" id="profile-tab">
+      <div class="profile-section">
+        
+        <div class="profile-header">
+          <div class="profile-avatar" id="profileAvatar">JD</div>
+          <div class="profile-info">
+            <h2 id="profileName">John Doe</h2>
+            <p id="profileTagline">Complete your profile to get better job matches</p>
+            <button class="btn-edit-profile" onclick="openEditProfileModal()">Edit Profile</button>
+          </div>
+        </div>
+
+        <div class="profile-details">
+          
+          <div class="detail-group">
+            <h3>Contact Information</h3>
+            <div class="detail-item">
+              <div class="detail-label">Email</div>
+              <div class="detail-value" id="profileEmail">john.doe@email.com</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Phone</div>
+              <div class="detail-value" id="profileMobile">+91 98765 43210</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Location</div>
+              <div class="detail-value" id="profileLocation">Not specified</div>
+            </div>
+          </div>
+
+          <div class="detail-group">
+            <h3>Professional Details</h3>
+            <div class="detail-item">
+              <div class="detail-label">Current Position</div>
+              <div class="detail-value" id="profilePosition">Not specified</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Experience</div>
+              <div class="detail-value" id="profileExperience">Not specified</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Expected Salary</div>
+              <div class="detail-value" id="profileSalary">Not specified</div>
+            </div>
+          </div>
+
+          <div class="detail-group">
+            <h3>Skills</h3>
+            <div class="job-tags" id="profileSkills">
+              <span style="color: #888; font-style: italic;">No skills added yet</span>
+            </div>
+          </div>
+
+          <div class="detail-group">
+            <h3>Education</h3>
+            <div class="detail-item">
+              <div class="detail-label">Degree</div>
+              <div class="detail-value" id="profileDegree">Not specified</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">University</div>
+              <div class="detail-value" id="profileUniversity">Not specified</div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-label">Year</div>
+              <div class="detail-value" id="profileYear">Not specified</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================
+       FOOTER
+  ============================================ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <div class="footer-logo">
+            <div class="logo-mark">
+              <svg viewBox="0 0 24 24">
+                <path d="M20 6h-3V4c0-1.1-.9-2-2-2H9C7.9 2 7 2.9 7 4v2H4C2.9 6 2 6.9 2 8v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-9-2h6v2H9V4zm11 16H4v-2h16v2zm0-5H4V8h3v1c0 .55.45 1 1 1s1-.45 1-1V8h6v1c0 .55.45 1 1 1s1-.45 1-1V8h3v7z"/>
+              </svg>
+            </div>
+            <span class="logo-name">Job<span>Sphere</span></span>
+          </div>
+          <p>Connecting talented professionals with the world's leading companies. Your next big opportunity starts here.</p>
+          <div class="social-links">
+            <a href="#"><svg viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
+            <a href="#"><svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.911-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+            <a href="#"><svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a>
+          </div>
+        </div>
+        
+        <div class="footer-section">
+          <h3>For Candidates</h3>
+          <ul>
+            <li><a href="#">Browse Jobs</a></li>
+            <li><a href="#">Career Advice</a></li>
+            <li><a href="#">Resume Builder</a></li>
+            <li><a href="#">Salary Guide</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h3>For Employers</h3>
+          <ul>
+            <li><a href="#">Post Jobs</a></li>
+            <li><a href="#">Find Candidates</a></li>
+            <li><a href="#">Pricing Plans</a></li>
+            <li><a href="#">Recruitment Solutions</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h3>Support</h3>
+          <ul>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>&copy; 2026 JobSphere. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Job Details Modal -->
+  <div class="modal-overlay" id="jobModal" onclick="if(event.target === this) closeJobModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalJobTitle">Job Title</h3>
+        <button class="modal-close" onclick="closeJobModal()">✕</button>
+      </div>
+      <div class="modal-body" id="modalJobBody">
+        <!-- Job details will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Profile Modal -->
+  <div class="modal-overlay" id="editProfileModal" onclick="if(event.target === this) closeEditProfileModal()">
+    <div class="modal" style="max-width: 700px;">
+      <div class="modal-header">
+        <h3>Edit Profile</h3>
+        <button class="modal-close" onclick="closeEditProfileModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="editProfileForm" onsubmit="saveProfile(event)">
+          
+          <div style="margin-bottom: 20px;">
+            <h4 style="color: #1f4959; margin-bottom: 12px; font-size: 1rem;">Professional Details</h4>
+            
+            <div style="margin-bottom: 14px;">
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #1f4959; margin-bottom: 5px;">Location</label>
+              <input type="text" id="editLocation" placeholder="e.g. Mumbai, Maharashtra" style="width: 100%; padding: 10px; border: 1.5px solid #d0e6ee; border-radius: 8px; font-size: 0.88rem;" />
+            </div>
+            
+            <div style="margin-bottom: 14px;">
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #1f4959; margin-bottom: 5px;">Current Position</label>
+              <input type="text" id="editPosition" placeholder="e.g. Senior Developer at Tech Corp" style="width: 100%; padding: 10px; border: 1.5px solid #d0e6ee; border-radius: 8px; font-size: 0.88rem;" />
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #1f4959; margin-bottom: 5px;">Experience</label>
+                <input type="text" id="editExperience" placeholder="e.g. 5 Years" style="width: 100%; padding: 10px; border: 1.5px solid #d0e6ee; border-radius: 8px; font-size: 0.88rem;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #1f4959; margin-bottom: 5px;">Expected Salary</label>
+                <input type="text" id="editSalary" placeholder="e.g. ₹12-15 LPA" style="width: 100%; padding: 10px; border: 1.5px solid #d0e6ee; border-radius: 8px; font-size: 0.88rem;" />
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <h4 style="color: #1f4959; margin-bottom: 12px; font-size: 1rem;">Skills</h4>
+            <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #1f4959; margin-bottom: 5px;">Add your skills (comma separated)</label>
+            <input type="text" id="editSkills" placeholder="e.g. JavaScript, React, Node.js, Python" style="width: 100%; padding: 10px; border: 1.5px solid #d0e6ee; border-radius: 8px; font-size: 0.88rem;" />
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <h4 style="color: #1f4959; margin-bottom: 12px; font-size: 1rem;">Education</h4>
+            
+            <div style="margin-bottom: 14px;">
+              <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #1f4959; margin-bottom: 5px;">Degree</label>
+              <input type="text" id="editDegree" placeholder="e.g. B.Tech Computer Science" style="width: 100%; padding: 10px; border: 1.5px solid #d0e6ee; border-radius: 8px; font-size: 0.88rem;" />
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px;">
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #1f4959; margin-bottom: 5px;">University/College</label>
+                <input type="text" id="editUniversity" placeholder="e.g. IIT Delhi" style="width: 100%; padding: 10px; border: 1.5px solid #d0e6ee; border-radius: 8px; font-size: 0.88rem;" />
+              </div>
+              <div>
+                <label style="display: block; font-size: 0.8rem; font-weight: 600; color: #1f4959; margin-bottom: 5px;">Year</label>
+                <input type="text" id="editYear" placeholder="e.g. 2020" style="width: 100%; padding: 10px; border: 1.5px solid #d0e6ee; border-radius: 8px; font-size: 0.88rem;" />
+              </div>
+            </div>
+          </div>
+
+          <button type="submit" style="width: 100%; background: #1f4959; color: #ffffff; border: none; padding: 12px; border-radius: 8px; font-size: 0.9rem; font-weight: 700; cursor: pointer;">
+            Save Profile
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/candidate-dashboard.js"></script>
+  <script>
+    // Profile data storage
+    let profileData = {
+      location: '',
+      position: '',
+      experience: '',
+      salary: '',
+      skills: '',
+      degree: '',
+      university: '',
+      year: ''
+    };
+
+    // Load user data from sessionStorage
+    document.addEventListener('DOMContentLoaded', function() {
+      const userDataStr = sessionStorage.getItem('candidateUser');
+      
+      if (!userDataStr) {
+        // No user logged in, redirect to login
+        alert('Please login first!');
+        window.location.href = 'candidate.html';
+        return;
+      }
+      
+      const userData = JSON.parse(userDataStr);
+      
+      // Update header name
+      document.getElementById('userName').textContent = userData.name;
+      
+      // Update profile section
+      document.getElementById('profileName').textContent = userData.name;
+      document.getElementById('profileEmail').textContent = userData.email;
+      
+      // Update mobile if available
+      if (userData.mobile) {
+        document.getElementById('profileMobile').textContent = userData.mobile;
+      }
+      
+      // Update avatar with initials
+      const initials = userData.name.split(' ').map(n => n[0]).join('').toUpperCase();
+      document.getElementById('profileAvatar').textContent = initials;
+
+      // Load profile data from localStorage
+      const savedProfile = localStorage.getItem('candidateProfile_' + userData.email);
+      if (savedProfile) {
+        profileData = JSON.parse(savedProfile);
+        updateProfileDisplay();
+      }
+    });
+
+    // Update profile display
+    function updateProfileDisplay() {
+      document.getElementById('profileLocation').textContent = profileData.location || 'Not specified';
+      document.getElementById('profilePosition').textContent = profileData.position || 'Not specified';
+      document.getElementById('profileExperience').textContent = profileData.experience || 'Not specified';
+      document.getElementById('profileSalary').textContent = profileData.salary || 'Not specified';
+      document.getElementById('profileDegree').textContent = profileData.degree || 'Not specified';
+      document.getElementById('profileUniversity').textContent = profileData.university || 'Not specified';
+      document.getElementById('profileYear').textContent = profileData.year || 'Not specified';
+
+      // Update skills
+      const skillsContainer = document.getElementById('profileSkills');
+      if (profileData.skills) {
+        const skillsArray = profileData.skills.split(',').map(s => s.trim()).filter(s => s);
+        skillsContainer.innerHTML = skillsArray.map(skill => `<span class="tag">${skill}</span>`).join('');
+      } else {
+        skillsContainer.innerHTML = '<span style="color: #888; font-style: italic;">No skills added yet</span>';
+      }
+
+      // Update tagline
+      if (profileData.position && profileData.experience) {
+        document.getElementById('profileTagline').textContent = `${profileData.position} | ${profileData.experience}`;
+      } else {
+        document.getElementById('profileTagline').textContent = 'Complete your profile to get better job matches';
+      }
+    }
+
+    // Open edit profile modal
+    function openEditProfileModal() {
+      // Pre-fill form with existing data
+      document.getElementById('editLocation').value = profileData.location || '';
+      document.getElementById('editPosition').value = profileData.position || '';
+      document.getElementById('editExperience').value = profileData.experience || '';
+      document.getElementById('editSalary').value = profileData.salary || '';
+      document.getElementById('editSkills').value = profileData.skills || '';
+      document.getElementById('editDegree').value = profileData.degree || '';
+      document.getElementById('editUniversity').value = profileData.university || '';
+      document.getElementById('editYear').value = profileData.year || '';
+
+      document.getElementById('editProfileModal').classList.add('open');
+    }
+
+    // Close edit profile modal
+    function closeEditProfileModal() {
+      document.getElementById('editProfileModal').classList.remove('open');
+    }
+
+    // Save profile
+    function saveProfile(event) {
+      event.preventDefault();
+
+      // Get form values
+      profileData.location = document.getElementById('editLocation').value;
+      profileData.position = document.getElementById('editPosition').value;
+      profileData.experience = document.getElementById('editExperience').value;
+      profileData.salary = document.getElementById('editSalary').value;
+      profileData.skills = document.getElementById('editSkills').value;
+      profileData.degree = document.getElementById('editDegree').value;
+      profileData.university = document.getElementById('editUniversity').value;
+      profileData.year = document.getElementById('editYear').value;
+
+      // Save to localStorage
+      const userDataStr = sessionStorage.getItem('candidateUser');
+      const userData = JSON.parse(userDataStr);
+      localStorage.setItem('candidateProfile_' + userData.email, JSON.stringify(profileData));
+
+      // Update display
+      updateProfileDisplay();
+
+      // Close modal
+      closeEditProfileModal();
+
+      alert('Profile updated successfully!');
+    }
+    
+    // Logout function
+    function logout() {
+      if (confirm('Are you sure you want to logout?')) {
+        sessionStorage.removeItem('candidateUser');
+        window.location.href = 'candidate.html';
+      }
+    }
+  </script>
+
+</body>
+</html>

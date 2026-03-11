@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Company Login / Register – JobSphere</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:ital,wght@0,700;1,700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+
+    /* ══════════════════════════════════════
+       RESET & BASE
+    ══════════════════════════════════════ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 16px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ══════════════════════════════════════
+       FIXED BACKGROUND PHOTO
+       (never moves, both forms share it)
+    ══════════════════════════════════════ */
+    .bg-photo {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .bg-photo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+    }
+
+    .bg-photo::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 35, 50, 0.72);
+    }
+
+    /* ══════════════════════════════════════
+       OUTER WRAPPER
+       Clips the sliding cards
+    ══════════════════════════════════════ */
+    .forms-wrapper {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 520px;
+
+      /* Height will auto-size to tallest card */
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr;
+    }
+
+    /* ══════════════════════════════════════
+       SHARED CARD STYLES
+    ══════════════════════════════════════ */
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.4);
+      overflow: hidden;
+
+      /* Stack both cards on top of each other */
+      grid-row: 1;
+      grid-column: 1;
+
+      /* Transition for slide animation */
+      transition: transform 0.55s cubic-bezier(0.77, 0, 0.18, 1),
+                  opacity  0.45s ease;
+      will-change: transform, opacity;
+    }
+
+    /* LOGIN card — visible by default */
+    #login-card {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: all;
+      z-index: 2;
+    }
+
+    /* REGISTER card — hidden off to the right by default */
+    #register-card {
+      transform: translateX(110%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ── ACTIVE STATE: show register, hide login ── */
+    body.show-register #login-card {
+      transform: translateX(-110%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    body.show-register #register-card {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: all;
+      z-index: 2;
+    }
+
+    /* ══════════════════════════════════════
+       CARD HEADER
+    ══════════════════════════════════════ */
+    .card-header {
+      background: #1f4959;
+      padding: 26px 32px 20px;
+      text-align: center;
+    }
+
+    .card-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      margin-bottom: 12px;
+    }
+
+    .card-logo-icon {
+      width: 38px;
+      height: 38px;
+      background: #ffffff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .card-logo-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: #1f4959;
+    }
+
+    .card-logo-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3rem;
+      color: #ffffff;
+      letter-spacing: 0.5px;
+    }
+
+    .card-logo-name span {
+      color: #7dd3f0;
+    }
+
+    .card-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.1rem;
+      color: #ffffff;
+      font-weight: 700;
+    }
+
+    .card-header p {
+      margin-top: 4px;
+      font-size: 0.76rem;
+      color: rgba(255, 255, 255, 0.62);
+    }
+
+    /* ══════════════════════════════════════
+       CARD BODY
+    ══════════════════════════════════════ */
+    .card-body {
+      padding: 26px 28px 28px;
+    }
+
+    /* ══════════════════════════════════════
+       LOGIN FORM — single column fields
+    ══════════════════════════════════════ */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #1f4959;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Icon inside input */
+    .input-wrap > svg:first-child {
+      position: absolute;
+      left: 12px;
+      width: 16px;
+      height: 16px;
+      fill: #9bb5bf;
+      pointer-events: none;
+    }
+
+    .input-wrap input {
+      width: 100%;
+      border: 1.5px solid #d0e6ee;
+      border-radius: 8px;
+      padding: 10px 40px 10px 38px;
+      font-size: 0.88rem;
+      font-family: 'DM Sans', sans-serif;
+      color: #222;
+      background: #f7fbfd;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .input-wrap input:focus {
+      border-color: #1f4959;
+      background: #ffffff;
+    }
+
+    .input-wrap input::placeholder {
+      color: #b0c8d0;
+    }
+
+    /* Eye toggle */
+    .pwd-toggle {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .pwd-toggle svg {
+      width: 16px;
+      height: 16px;
+      fill: #9bb5bf;
+    }
+
+    /* Forgot row */
+    .forgot-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -8px;
+      margin-bottom: 16px;
+    }
+
+    .forgot-row a {
+      font-size: 0.77rem;
+      color: #1f4959;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .forgot-row a:hover {
+      text-decoration: underline;
+    }
+
+    /* ══════════════════════════════════════
+       REGISTER FORM — 2-column grid
+    ══════════════════════════════════════ */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-grid .col-full {
+      grid-column: 1 / -1;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-field label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #1f4959;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .form-field label .req {
+      color: #e05555;
+      margin-left: 2px;
+    }
+
+    /* Input with teal icon box — matches reference style */
+    .field-input {
+      display: flex;
+      border: 1.5px solid #c8e0ea;
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+
+    .field-input:focus-within {
+      border-color: #1f4959;
+    }
+
+    .field-icon {
+      background: #1f4959;
+      width: 40px;
+      min-width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .field-icon svg {
+      width: 15px;
+      height: 15px;
+      fill: #ffffff;
+    }
+
+    .field-input input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 9px 10px;
+      font-size: 0.84rem;
+      font-family: 'DM Sans', sans-serif;
+      color: #222;
+      background: #f6fafb;
+      min-width: 0;
+    }
+
+    .field-input input:focus {
+      background: #ffffff;
+    }
+
+    .field-input input::placeholder {
+      color: #aac4ce;
+    }
+
+    /* Eye toggle inside field-input */
+    .eye-btn {
+      background: #f6fafb;
+      border: none;
+      border-left: 1px solid #c8e0ea;
+      padding: 0 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .eye-btn:hover {
+      background: #eaf4f8;
+    }
+
+    .eye-btn svg {
+      width: 14px;
+      height: 14px;
+      fill: #9bb5bf;
+    }
+
+    /* ══════════════════════════════════════
+       SHARED BOTTOM ELEMENTS
+    ══════════════════════════════════════ */
+
+    /* Submit button */
+    .btn-submit {
+      width: 100%;
+      background: #1f4959;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 4px;
+    }
+
+    .btn-submit:hover {
+      background: #163a47;
+    }
+
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    /* Terms row */
+    .terms-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 9px;
+      margin-top: 14px;
+      margin-bottom: 14px;
+    }
+
+    .terms-row input[type="checkbox"] {
+      margin-top: 3px;
+      accent-color: #1f4959;
+      width: 15px;
+      height: 15px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .terms-row label {
+      font-size: 0.8rem;
+      color: #555;
+      line-height: 1.5;
+      cursor: pointer;
+    }
+
+    .terms-row label a {
+      color: #1f4959;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .terms-row label a:hover {
+      text-decoration: underline;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #ddedf3;
+    }
+
+    .divider span {
+      font-size: 0.73rem;
+      color: #9bb5bf;
+      white-space: nowrap;
+    }
+
+    /* Switch link row */
+    .switch-link {
+      text-align: center;
+      font-size: 0.84rem;
+      color: #555;
+    }
+
+    /* The clickable switch button — looks like a link */
+    .btn-switch {
+      background: none;
+      border: none;
+      color: #1f4959;
+      font-weight: 700;
+      font-size: 0.84rem;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      padding: 0;
+      text-decoration: none;
+      display: inline;
+    }
+
+    .btn-switch:hover {
+      text-decoration: underline;
+    }
+
+    /* Back to home link */
+    .back-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      margin-top: 12px;
+      font-size: 0.76rem;
+      color: #9bb5bf;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: #1f4959;
+    }
+
+    .back-link svg {
+      width: 12px;
+      height: 12px;
+      fill: currentColor;
+    }
+
+    /* ══════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════ */
+    @media (max-width: 480px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid .col-full {
+        grid-column: 1;
+      }
+
+      .card-body {
+        padding: 20px 16px 24px;
+      }
+
+      .card-header {
+        padding: 20px 16px 16px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Fixed background — stays put while cards slide -->
+  <div class="bg-photo">
+    <img
+      src="images/bg.jpg"
+      alt="Office background"
+    />
+  </div>
+
+  <!-- Both cards stacked in the same grid cell -->
+  <div class="forms-wrapper">
+
+    <!-- ════════════════════════════════
+         LOGIN CARD
+    ════════════════════════════════ -->
+    <div class="card" id="login-card">
+
+      <div class="card-header">
+        <a href="index.html" class="card-logo">
+          <div class="card-logo-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M20 6h-3V4c0-1.1-.9-2-2-2H9C7.9 2 7 2.9 7 4v2H4
+                       C2.9 6 2 6.9 2 8v12c0 1.1.9 2 2 2h16c1.1 0 2-.9
+                       2-2V8c0-1.1-.9-2-2-2zm-9-2h6v2H9V4zm11 16H4v-2h16
+                       v2zm0-5H4V8h3v1c0 .55.45 1 1 1s1-.45 1-1V8h6v1c0
+                       .55.45 1 1 1s1-.45 1-1V8h3v7z"/>
+            </svg>
+          </div>
+          <span class="card-logo-name">Job<span>Sphere</span></span>
+        </a>
+        <h2>Company Login</h2>
+        <p>Sign in to manage your job listings &amp; hiring</p>
+      </div>
+
+      <div class="card-body">
+        <form action="#" method="post">
+
+          <!-- Username / Email -->
+          <div class="form-group">
+            <label for="login-username">Username / Email</label>
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24">
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4
+                         7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6
+                         1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+              </svg>
+              <input
+                type="text"
+                id="login-username"
+                name="username"
+                placeholder="Enter your username or email"
+                required
+              />
+            </div>
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label for="login-password">Password</label>
+            <div class="input-wrap">
+              <svg viewBox="0 0 24 24">
+                <path d="M18 8h-1V6c0-2.8-2.2-5-5-5S7 3.2 7 6v2H6c-1.1
+                         0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10
+                         c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2
+                         2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.7 1.4-3.1
+                         3.1-3.1 1.7 0 3.1 1.4 3.1 3.1v2z"/>
+              </svg>
+              <input
+                type="password"
+                id="login-password"
+                name="password"
+                placeholder="Enter your password"
+                required
+              />
+              <button type="button" class="pwd-toggle" onclick="togglePwd('login-password')">
+                <svg viewBox="0 0 24 24">
+                  <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5
+                           11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12
+                           17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24
+                           5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34
+                           3-3-1.34-3-3-3z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Forgot Password -->
+          <div class="forgot-row">
+            <a href="#">Forgot Password?</a>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn-submit">Login to Dashboard</button>
+
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span>Don't have an account?</span>
+        </div>
+
+        <!-- Switch to Register -->
+        <div class="switch-link">
+          New to JobSphere?
+          <button class="btn-switch" onclick="showRegister()">
+            Create a Company Account →
+          </button>
+        </div>
+
+      </div>
+    </div>
+    <!-- END LOGIN CARD -->
+
+
+    <!-- ════════════════════════════════
+         REGISTER CARD
+    ════════════════════════════════ -->
+    <div class="card" id="register-card">
+
+      <div class="card-header">
+        <a href="index.html" class="card-logo">
+          <div class="card-logo-icon">
+            <svg viewBox="0 0 24 24">
+              <path d="M20 6h-3V4c0-1.1-.9-2-2-2H9C7.9 2 7 2.9 7 4v2H4
+                       C2.9 6 2 6.9 2 8v12c0 1.1.9 2 2 2h16c1.1 0 2-.9
+                       2-2V8c0-1.1-.9-2-2-2zm-9-2h6v2H9V4zm11 16H4v-2h16
+                       v2zm0-5H4V8h3v1c0 .55.45 1 1 1s1-.45 1-1V8h6v1c0
+                       .55.45 1 1 1s1-.45 1-1V8h3v7z"/>
+            </svg>
+          </div>
+          <span class="card-logo-name">Job<span>Sphere</span></span>
+        </a>
+        <h2>Create Company Account</h2>
+        <p>Register to post jobs and find the right talent</p>
+      </div>
+
+      <div class="card-body">
+        <form action="#" method="post">
+
+          <div class="form-grid">
+
+            <!-- Company Name -->
+            <div class="form-field">
+              <label for="reg-company">Company Name <span class="req">*</span></label>
+              <div class="field-input">
+                <div class="field-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4
+                             H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8
+                             V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8
+                             v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/>
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  id="reg-company"
+                  name="company_name"
+                  placeholder="Company Name"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Email -->
+            <div class="form-field">
+              <label for="reg-email">Email <span class="req">*</span></label>
+              <div class="field-input">
+                <div class="field-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16
+                             c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                  </svg>
+                </div>
+                <input
+                  type="email"
+                  id="reg-email"
+                  name="email"
+                  placeholder="Email"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Contact No -->
+            <div class="form-field">
+              <label for="reg-phone">Contact No <span class="req">*</span></label>
+              <div class="field-input">
+                <div class="field-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2
+                             c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1
+                             .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55
+                             .45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11
+                             .35.03.74-.25 1.02l-2.2 2.2z"/>
+                  </svg>
+                </div>
+                <input
+                  type="tel"
+                  id="reg-phone"
+                  name="contact_no"
+                  placeholder="Contact No"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Contact Person -->
+            <div class="form-field">
+              <label for="reg-person">Contact Person <span class="req">*</span></label>
+              <div class="field-input">
+                <div class="field-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4
+                             7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6
+                             1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  id="reg-person"
+                  name="contact_person"
+                  placeholder="Contact Person Name"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div class="form-field">
+              <label for="reg-password">Password <span class="req">*</span></label>
+              <div class="field-input">
+                <div class="field-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M18 8h-1V6c0-2.8-2.2-5-5-5S7 3.2 7 6v2H6c-1.1 0-2
+                             .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1
+                             -.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2
+                             -.9 2-2 2zm3.1-9H8.9V6c0-1.7 1.4-3.1 3.1-3.1 1.7 0
+                             3.1 1.4 3.1 3.1v2z"/>
+                  </svg>
+                </div>
+                <input
+                  type="password"
+                  id="reg-password"
+                  name="password"
+                  placeholder="Password"
+                  required
+                />
+                <button type="button" class="eye-btn" onclick="togglePwd('reg-password')">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27
+                             -3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24
+                             -5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34
+                             -3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="form-field">
+              <label for="reg-confirm">Confirm Password <span class="req">*</span></label>
+              <div class="field-input">
+                <div class="field-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M18 8h-1V6c0-2.8-2.2-5-5-5S7 3.2 7 6v2H6c-1.1 0-2
+                             .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1
+                             -.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2
+                             -.9 2-2 2zm3.1-9H8.9V6c0-1.7 1.4-3.1 3.1-3.1 1.7 0
+                             3.1 1.4 3.1 3.1v2z"/>
+                  </svg>
+                </div>
+                <input
+                  type="password"
+                  id="reg-confirm"
+                  name="confirm_password"
+                  placeholder="Confirm Password"
+                  required
+                />
+                <button type="button" class="eye-btn" onclick="togglePwd('reg-confirm')">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27
+                             -3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24
+                             -5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34
+                             -3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- Website — left column only -->
+            <div class="form-field">
+              <label for="reg-website">Website <span class="req">*</span></label>
+              <div class="field-input">
+                <div class="field-icon">
+                  <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48
+                             10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93
+                             0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9
+                             -2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8
+                             v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19
+                             5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                  </svg>
+                </div>
+                <input
+                  type="url"
+                  id="reg-website"
+                  name="website"
+                  placeholder="https://yourcompany.com"
+                />
+              </div>
+            </div>
+
+          </div>
+          <!-- END form-grid -->
+
+          <!-- Terms -->
+          <div class="terms-row">
+            <input type="checkbox" id="terms" name="terms" required />
+            <label for="terms">
+              I agree to the
+              <a href="#">Terms &amp; Conditions</a>
+              and
+              <a href="#">Privacy Policy</a>
+              of JobSphere.
+            </label>
+          </div>
+
+          <!-- Submit -->
+          <button type="submit" class="btn-submit">
+            Create Company Account
+          </button>
+
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span>Already have an account?</span>
+        </div>
+
+        <!-- Switch back to Login -->
+        <div class="switch-link">
+          <button class="btn-switch" onclick="showLogin()">
+            ← Back to Login
+          </button>
+        </div>
+
+      </div>
+    </div>
+    <!-- END REGISTER CARD -->
+
+  </div>
+  <!-- END forms-wrapper -->
+
+  <script>
+
+    /* Show the register card — slides login left, register in from right */
+    function showRegister() {
+      document.body.classList.add('show-register');
+
+      /* Scroll to top so register header is visible */
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* Show the login card — slides register right, login back from left */
+    function showLogin() {
+      document.body.classList.remove('show-register');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* Toggle password visibility */
+    function togglePwd(fieldId) {
+      const input = document.getElementById(fieldId);
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    // Password validation and form submission
+    document.addEventListener('DOMContentLoaded', function() {
+      const registerForm = document.querySelector('#register-card form');
+      
+      if (registerForm) {
+        registerForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          
+          const company_name = document.getElementById('reg-company').value;
+          const email = document.getElementById('reg-email').value;
+          const contact_no = document.getElementById('reg-phone').value;
+          const contact_person = document.getElementById('reg-person').value;
+          const password = document.getElementById('reg-password').value;
+          const confirmPassword = document.getElementById('reg-confirm').value;
+          const website = document.getElementById('reg-website').value;
+          const terms = document.getElementById('terms').checked;
+          
+          // Check if passwords match
+          if (password !== confirmPassword) {
+            alert('Passwords do not match! Please make sure both passwords are the same.');
+            return false;
+          }
+          
+          // Check password length
+          if (password.length < 6) {
+            alert('Password must be at least 6 characters long.');
+            return false;
+          }
+          
+          // Check if terms are accepted
+          if (!terms) {
+            alert('Please accept the Terms & Conditions to continue.');
+            return false;
+          }
+          
+          // Send registration data to server
+          try {
+            const response = await fetch('/api/company/register', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ company_name, email, contact_no, contact_person, password, website })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              alert('Company registration successful! Welcome to JobSphere. Please login now.');
+              registerForm.reset();
+              showLogin();
+            } else {
+              alert(data.message || 'Registration failed. Please try again.');
+            }
+          } catch (error) {
+            alert('An error occurred. Please try again.');
+            console.error('Registration error:', error);
+          }
+        });
+      }
+
+      // Login form submission
+      const loginForm = document.querySelector('#login-card form');
+      
+      if (loginForm) {
+        loginForm.addEventListener('submit', async function(e) {
+          e.preventDefault();
+          
+          const username = document.getElementById('login-username').value;
+          const password = document.getElementById('login-password').value;
+          
+          if (!username || !password) {
+            alert('Please fill in all fields.');
+            return false;
+          }
+          
+          // Send login data to server
+          try {
+            const response = await fetch('/api/company/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ username, password })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+              // Store company info in sessionStorage
+              sessionStorage.setItem('companyUser', JSON.stringify(data.user));
+              // Redirect to company dashboard
+              window.location.href = 'company-dashboard.html';
+            } else {
+              alert(data.message || 'Invalid credentials!');
+            }
+          } catch (error) {
+            alert('An error occurred. Please try again.');
+            console.error('Login error:', error);
+          }
+        });
+      }
+    });
+
+  </script>
+
+</body>
+</html>

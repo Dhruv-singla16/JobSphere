@@ -1,0 +1,23 @@
+{
+  "candidates": [
+    {
+      "id": 1773227607658,
+      "name": "Dhruv Singla",
+      "email": "dhruv1078.becse24@chitkara.edu.in",
+      "mobile": "1234567890",
+      "password": "Hi@123456",
+      "createdAt": "2026-03-11T11:13:27.658Z"
+    }
+  ],
+  "companies": [
+    {
+      "company_name": "KICKSTER",
+      "email": "kickster@gmail.com",
+      "contact_no": "66666666666",
+      "contact_person": "Dhruv",
+      "password": "Hey@12345",
+      "website": "https://www.google.com",
+      "createdAt": "03/11/2026, 04:52:11 PM"
+    }
+  ]
+}
